@@ -22,17 +22,18 @@
             border-radius: 20px; position: relative; overflow: hidden;
         }
         
-        /* CORNER PANELS - NO OVERLAP */
+        /* FIXED CORNER PANELS */
         .top-left-panel {
             position: absolute; top: 15px; left: 15px; background: rgba(0,0,0,0.9);
             padding: 12px; border-radius: 12px; border: 2px solid #ffff00; min-width: 90px;
+            z-index: 10;
         }
         .top-right-panel {
             position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.9);
             padding: 12px; border-radius: 12px; border: 2px solid #00ff41; min-width: 90px;
+            z-index: 10;
         }
         
-        /* SPEED PANEL - TOP RIGHT */
         .speed-panel { text-align: center; }
         .speed-controls button {
             width: 35px; height: 35px; border-radius: 50%; border: 2px solid #00ff41;
@@ -40,53 +41,49 @@
             cursor: pointer;
         }
         
-        /* LEADERBOARD - TOP LEFT */
         .leaderboard { max-height: 180px; overflow-y: auto; font-size: 12px; }
         .leader-item { margin: 2px 0; color: #ffff00; }
-        .leader-you { color: #00ff41 !important; font-weight: bold; }
         
-        /* FULL SCREEN GAME AREA */
+        /* FULL SCREEN GAME AREA - FIXED POSITION */
         .game-area {
             position: absolute; top: 90px; left: 15px; right: 15px; bottom: 120px;
             display: grid; grid-template-columns: repeat(24, 1fr); grid-template-rows: repeat(30, 1fr);
-            gap: 1px; padding: 10px; background: #001100;
+            gap: 1px; padding: 10px; background: #001100; z-index: 1;
         }
         .cell { background: #004d00; border: 1px solid #003300; }
         .snake { background: #00ff41 !important; border-color: #00cc33 !important; }
         .food { background: #ffff00 !important; border-color: #cccc00 !important; box-shadow: 0 0 10px #ffff00; }
         
-        /* CIRCULAR JOYSTICK - BOTTOM CENTER */
+        /* FIXED JOYSTICK - NO MOVING */
         .joystick-container {
             position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%);
-            width: 220px; height: 220px; display: flex; align-items: center; justify-content: center;
+            width: 220px; height: 220px; pointer-events: none; /* Prevents interference */
         }
         .joystick-ring {
             width: 200px; height: 200px; border: 6px solid #00ff41; border-radius: 50%;
-            position: relative; background: rgba(0,77,0,0.3);
+            position: relative; background: rgba(0,77,0,0.3); pointer-events: none;
             box-shadow: 0 0 30px rgba(0,255,65,0.4);
         }
-        .joystick-left { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); }
-        .joystick-right { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); }
-        .joystick-up { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); }
-        .joystick-down { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); }
-        .joystick-pause { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
-        
         .joy-btn {
-            width: 65px; height: 65px; border-radius: 50%; border: 5px solid #00ff41;
-            background: linear-gradient(145deg, #004d00, #006600); color: #00ff41;
-            font-size: 26px; font-weight: bold; cursor: pointer; user-select: none;
-            display: flex; align-items: center; justify-content: center;
-            transition: all 0.15s; box-shadow: 0 10px 25px rgba(0,255,65,0.3);
-            touch-action: manipulation;
+            position: absolute; width: 65px; height: 65px; border-radius: 50%; 
+            border: 5px solid #00ff41; background: linear-gradient(145deg, #004d00, #006600);
+            color: #00ff41; font-size: 26px; font-weight: bold; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+            box-shadow: 0 10px 25px rgba(0,255,65,0.3); pointer-events: auto;
         }
         .joy-btn:active {
             transform: scale(0.92); box-shadow: 0 5px 15px rgba(0,255,65,0.2);
             background: linear-gradient(145deg, #003300, #005500);
         }
-        .pause-btn { 
-            background: linear-gradient(145deg, #ff4444, #cc3333) !important; 
-            border-color: #ff6666 !important; color: white !important; font-size: 22px;
-        }
+        .pause-btn { background: linear-gradient(145deg, #ff4444, #cc3333) !important; 
+            border-color: #ff6666 !important; color: white !important; font-size: 22px; }
+        
+        /* JOYSTICK POSITIONS - LOCKED */
+        .joystick-left { left: 20px; top: 50%; transform: translateY(-50%); }
+        .joystick-right { right: 20px; top: 50%; transform: translateY(-50%); }
+        .joystick-up { top: 20px; left: 50%; transform: translateX(-50%); }
+        .joystick-down { bottom: 20px; left: 50%; transform: translateX(-50%); }
+        .joystick-pause { top: 50%; left: 50%; transform: translate(-50%, -50%); }
         
         .logo { position: absolute; top: 8px; right: 20px; font-size: 18px; color: #666; font-weight: bold; z-index: 20; }
         .game-over {
@@ -102,28 +99,28 @@
     <div class="nokia-phone">
         <div class="logo">NOKIA 3310</div>
         <div class="screen">
-            <!-- SPEED PANEL - TOP RIGHT CORNER -->
+            <!-- SPEED PANEL - TOP RIGHT -->
             <div class="top-right-panel speed-panel">
                 <div style="font-weight:bold;">⚡ SPEED</div>
-                <div style="font-size:14px;margin:5px 0;">Level: <span id="level">Easy</span></div>
-                <div style="font-size:14px;">Speed: <span id="speed">150</span>ms</div>
-                <div class="speed-controls" style="margin-top:8px;">
+                <div>Level: <span id="level">Easy</span></div>
+                <div>Speed: <span id="speed">150</span>ms</div>
+                <div class="speed-controls">
                     <button onclick="game.changeSpeed(-25)">-</button>
                     <span id="speedVal">150</span>
                     <button onclick="game.changeSpeed(25)">+</button>
                 </div>
             </div>
             
-            <!-- LEADERBOARD - TOP LEFT CORNER -->
+            <!-- LEADERBOARD - TOP LEFT -->
             <div class="top-left-panel leaderboard">
                 <div style="font-weight:bold;color:#ffff00;">🏆 TOP 5</div>
                 <div id="leaderList"></div>
             </div>
             
-            <!-- FULL GAME AREA -->
+            <!-- GAME AREA -->
             <div class="game-area" id="gameArea"></div>
             
-            <!-- GAME OVER MODAL -->
+            <!-- GAME OVER -->
             <div class="game-over" id="gameOver">
                 GAME OVER!<br>
                 <div style="font-size:20px;margin:15px 0;">Final: <span id="finalScore">0</span></div>
@@ -131,15 +128,14 @@
             </div>
         </div>
         
-        <!-- CIRCULAR JOYSTICK -->
+        <!-- FIXED JOYSTICK -->
         <div class="joystick-container">
-            <div class="joystick-ring">
-                <div class="joy-btn joystick-left" ontouchstart="game.changeDirection({x:-1,y:0})" onmousedown="game.changeDirection({x:-1,y:0})">◀</div>
-                <div class="joy-btn joystick-up" ontouchstart="game.changeDirection({x:0,y:-1})" onmousedown="game.changeDirection({x:0,y:-1})">▲</div>
-                <div class="joy-btn joystick-down" ontouchstart="game.changeDirection({x:0,y:1})" onmousedown="game.changeDirection({x:0,y:1})">▼</div>
-                <div class="joy-btn joystick-right" ontouchstart="game.changeDirection({x:1,y:0})" onmousedown="game.changeDirection({x:1,y:0})">▶</div>
-                <div class="joy-btn pause-btn joystick-pause" onclick="game.togglePause()">⏸</div>
-            </div>
+            <div class="joystick-ring"></div>
+            <button class="joy-btn joystick-left" ontouchstart="game.dirLeft()" onmousedown="game.dirLeft()">◀</button>
+            <button class="joy-btn joystick-up" ontouchstart="game.dirUp()" onmousedown="game.dirUp()">▲</button>
+            <button class="joy-btn joystick-down" ontouchstart="game.dirDown()" onmousedown="game.dirDown()">▼</button>
+            <button class="joy-btn joystick-right" ontouchstart="game.dirRight()" onmousedown="game.dirRight()">▶</button>
+            <button class="joy-btn pause-btn joystick-pause" onclick="game.togglePause()">⏸</button>
         </div>
     </div>
 
@@ -149,7 +145,7 @@
                 this.gridSize = 24; this.gridHeight = 30;
                 this.snake = [{x: 12, y: 15}]; this.direction = {x: 1, y: 0};
                 this.food = {}; this.score = 0; this.gameSpeed = 150;
-                this.gameRunning = true; this.paused = false; this.currentLevel = 'easy';
+                this.gameRunning = true; this.paused = false;
                 this.leaderboard = JSON.parse(localStorage.getItem('snakeLeaderboard') || '[]');
                 this.initElements(); this.init();
             }
@@ -166,16 +162,21 @@
             }
 
             init() {
-                this.createGrid(); this.placeFood(); this.gameLoop(); this.bindControls();
-                this.updateUI(); this.updateLeaderboard();
+                this.createGrid(); this.placeFood(); this.gameLoop(); this.updateUI(); 
+                this.updateLeaderboard();
             }
+
+            dirLeft() { this.changeDirection({x: -1, y: 0}); }
+            dirRight() { this.changeDirection({x: 1, y: 0}); }
+            dirUp() { this.changeDirection({x: 0, y: -1}); }
+            dirDown() { this.changeDirection({x: 0, y: 1}); }
 
             togglePause() {
                 this.paused = !this.paused;
-                if(!this.paused) this.gameLoop();
+                document.querySelector('.pause-btn').textContent = this.paused ? '▶' : '⏸';
+                if(!this.paused && this.gameRunning) this.gameLoop();
             }
 
-            // ... [rest of game logic same as previous version - createGrid, update, etc.]
             createGrid() {
                 this.gameArea.innerHTML = '';
                 for(let y = 0; y < this.gridHeight; y++) {
@@ -185,12 +186,67 @@
                         this.gameArea.appendChild(cell);
                     }
                 }
+                this.updateSnake();
             }
 
-            setLevel(level) {
-                this.currentLevel = level;
-                this.gameSpeed = {easy: 150, medium: 100, hard: 75}[level];
-                this.updateUI();
+            updateSnake() {
+                this.snake.forEach((segment, i) => this.updateCell(segment.x, segment.y, i === 0 ? 'snake' : 'snake'));
+            }
+
+            placeFood() {
+                do {
+                    this.food = {
+                        x: Math.floor(Math.random() * this.gridSize),
+                        y: Math.floor(Math.random() * this.gridHeight)
+                    };
+                } while(this.isSnakeOnPosition(this.food.x, this.food.y));
+                this.updateCell(this.food.x, this.food.y, 'food');
+            }
+
+            gameLoop() {
+                if(!this.gameRunning || this.paused) return;
+                setTimeout(() => {
+                    this.update();
+                    this.gameLoop();
+                }, this.gameSpeed);
+            }
+
+            update() {
+                const head = {
+                    x: this.snake[0].x + this.direction.x,
+                    y: this.snake[0].y + this.direction.y
+                };
+
+                if(head.x < 0 || head.x >= this.gridSize || head.y < 0 || head.y >= this.gridHeight) {
+                    this.gameOver(); return;
+                }
+                if(this.isSnakeOnPosition(head.x, head.y)) {
+                    this.gameOver(); return;
+                }
+
+                this.snake.unshift(head);
+                if(head.x === this.food.x && head.y === this.food.y) {
+                    this.score += 10;
+                    this.placeFood();
+                } else {
+                    const tail = this.snake.pop();
+                    this.updateCell(tail.x, tail.y, '');
+                }
+                this.updateCell(head.x, head.y, 'snake');
+            }
+
+            isSnakeOnPosition(x, y) {
+                return this.snake.some(segment => segment.x === x && segment.y === y);
+            }
+
+            updateCell(x, y, className) {
+                const cell = this.gameArea.querySelector(`[data-x="${x}"][data-y="${y}"]`);
+                if(cell) cell.className = className ? `cell ${className}` : 'cell';
+            }
+
+            changeDirection(newDir) {
+                if((newDir.x * -1 === this.direction.x && newDir.y * -1 === this.direction.y)) return;
+                this.direction = newDir;
             }
 
             changeSpeed(delta) {
@@ -199,12 +255,39 @@
             }
 
             updateUI() {
-                this.levelEl.textContent = this.currentLevel.toUpperCase();
                 this.speedEl.textContent = this.speedValEl.textContent = this.gameSpeed;
             }
 
-            placeFood() {
-                do {
-                    this.food = {x: Math.floor(Math.random() * this.gridSize), y: Math.floor(Math.random() * this.gridHeight)};
-                } while(this.isSnakeOnPosition(this.food.x, this.food.y));
-                this.updateCell(this.food.x, this.food.y, 'food
+            updateLeaderboard() {
+                const leaders = this.leaderboard.slice(0, 5).map((score, i) => 
+                    `<div class="leader-item">${i+1}. ${score}</div>`
+                );
+                this.leaderboardEl.innerHTML = leaders.join('');
+            }
+
+            gameOver() {
+                this.gameRunning = false;
+                this.finalScoreEl.textContent = this.score;
+                this.gameOverEl.style.display = 'block';
+                
+                this.leaderboard.push(this.score);
+                this.leaderboard.sort((a,b) => b - a);
+                this.leaderboard = this.leaderboard.slice(0, 10);
+                localStorage.setItem('snakeLeaderboard', JSON.stringify(this.leaderboard));
+                this.updateLeaderboard();
+            }
+
+            restart() {
+                this.snake = [{x: 12, y: 15}]; this.direction = {x: 1, y: 0};
+                this.score = 0; this.gameRunning = true; this.paused = false;
+                document.querySelector('.pause-btn').textContent = '⏸';
+                this.gameOverEl.style.display = 'none';
+                this.createGrid(); this.placeFood(); this.gameLoop();
+            }
+        }
+
+        let game;
+        window.addEventListener('load', () => { game = new SnakeGame(); });
+    </script>
+</body>
+</html>
