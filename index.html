@@ -16,57 +16,65 @@
             color: #00ff41;
         }
         .nokia-phone {
-            width: 300px; height: 500px;
+            width: 340px; height: 580px;
             background: linear-gradient(145deg, #0f1419, #1e293b);
-            border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+            border-radius: 25px;
+            padding: 25px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.9);
             position: relative;
         }
         .screen {
-            width: 100%; height: 70%;
+            width: 100%; height: 75%;
             background: #0a0a0a;
-            border: 4px solid #333;
-            border-radius: 10px;
+            border: 5px solid #333;
+            border-radius: 15px;
             position: relative;
             overflow: hidden;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         .game-area {
-            width: 100%; height: 100%;
+            width: 100%; height: 70%;
             display: grid;
-            grid-template-columns: repeat(20, 1fr);
-            grid-template-rows: repeat(25, 1fr);
+            grid-template-columns: repeat(22, 1fr);
+            grid-template-rows: repeat(28, 1fr);
             gap: 1px;
-            padding: 10px;
+            padding: 12px;
             background: #001100;
+            margin-bottom: 10px;
         }
         .cell {
             background: #004d00;
             border: 1px solid #003300;
         }
         .snake { background: #00ff41 !important; border-color: #00cc33 !important; }
-        .food { background: #ffff00 !important; border-color: #cccc00 !important; box-shadow: 0 0 5px #ffff00; }
-        .score {
-            position: absolute; top: 10px; left: 10px;
-            font-size: 18px; font-weight: bold;
-            text-shadow: 0 0 10px #00ff41;
+        .food { background: #ffff00 !important; border-color: #cccc00 !important; box-shadow: 0 0 8px #ffff00; }
+        .ui-panel {
+            position: absolute; bottom: 15px; left: 15px; right: 15px;
+            background: rgba(0,0,0,0.8); padding: 10px; border-radius: 8px;
+            display: flex; justify-content: space-between; align-items: center;
         }
+        .score-level { font-size: 16px; font-weight: bold; }
+        .level-btns button, .speed-btns button {
+            background: #00ff41; color: #000; border: none;
+            padding: 8px 12px; border-radius: 5px; font-weight: bold;
+            cursor: pointer; font-size: 14px; margin: 0 2px;
+        }
+        .speed-btns button { background: #444; color: #00ff41; }
         .game-over {
             position: absolute; top: 50%; left: 50%;
             transform: translate(-50%, -50%);
             text-align: center; color: #ff4444;
-            font-size: 24px; text-shadow: 0 0 10px #ff4444;
-            display: none;
-        }
-        .controls {
-            display: flex; justify-content: space-around;
-            font-size: 24px; color: #00ff41;
-            text-shadow: 0 0 5px #00ff41;
+            font-size: 28px; font-weight: bold; text-shadow: 0 0 15px #ff4444;
+            display: none; z-index: 10;
         }
         .logo {
-            position: absolute; top: 5px; right: 10px;
-            font-size: 14px; color: #666; font-weight: bold;
+            position: absolute; top: 8px; right: 15px;
+            font-size: 16px; color: #666; font-weight: bold;
+        }
+        .restart-btn {
+            background: #ff4444; color: white; border: none;
+            padding: 12px 24px; border-radius: 8px; font-size: 18px;
+            cursor: pointer; margin-top: 15px; font-weight: bold;
         }
     </style>
 </head>
@@ -74,32 +82,46 @@
     <div class="nokia-phone">
         <div class="logo">NOKIA</div>
         <div class="screen">
-            <div class="score" id="score">SCORE: 0</div>
             <div class="game-area" id="gameArea"></div>
+            <div class="ui-panel">
+                <div class="score-level">
+                    <div>SCORE: <span id="score">0</span></div>
+                    <div>LEVEL: <span id="level">Easy</span> (Speed: <span id="speed">150</span>ms)</div>
+                </div>
+                <div class="level-btns">
+                    <button onclick="game.setLevel('easy')">Easy</button>
+                    <button onclick="game.setLevel('medium')">Med</button>
+                    <button onclick="game.setLevel('hard')">Hard</button>
+                </div>
+                <div class="speed-btns">
+                    <button onclick="game.changeSpeed(-25)">-</button>
+                    <button onclick="game.changeSpeed(25)">+</button>
+                </div>
+            </div>
             <div class="game-over" id="gameOver">
                 GAME OVER!<br>
-                Final: <span id="finalScore">0</span>
+                Final Score: <span id="finalScore">0</span><br>
+                <button class="restart-btn" onclick="game.restart()">PLAY AGAIN</button>
             </div>
-        </div>
-        <div class="controls">
-            <div>↑</div>
-            <div>← ↓ →</div>
         </div>
     </div>
 
     <script>
         class SnakeGame {
             constructor() {
-                this.gridSize = 20;
-                this.gridHeight = 25;
-                this.cellSize = 15;
-                this.snake = [{x: 10, y: 12}];
+                this.gridSize = 22;
+                this.gridHeight = 28;
+                this.snake = [{x: 11, y: 14}];
                 this.direction = {x: 1, y: 0};
                 this.food = {};
                 this.score = 0;
+                this.gameSpeed = 150; // Easy: 150ms, Medium: 100ms, Hard: 75ms
                 this.gameRunning = true;
+                this.currentLevel = 'easy';
                 this.gameArea = document.getElementById('gameArea');
                 this.scoreEl = document.getElementById('score');
+                this.levelEl = document.getElementById('level');
+                this.speedEl = document.getElementById('speed');
                 this.gameOverEl = document.getElementById('gameOver');
                 this.finalScoreEl = document.getElementById('finalScore');
                 this.init();
@@ -110,6 +132,7 @@
                 this.placeFood();
                 this.gameLoop();
                 this.bindControls();
+                this.updateUI();
             }
 
             createGrid() {
@@ -125,6 +148,26 @@
                 }
             }
 
+            setLevel(level) {
+                this.currentLevel = level;
+                switch(level) {
+                    case 'easy': this.gameSpeed = 150; break;
+                    case 'medium': this.gameSpeed = 100; break;
+                    case 'hard': this.gameSpeed = 75; break;
+                }
+                this.updateUI();
+            }
+
+            changeSpeed(delta) {
+                this.gameSpeed = Math.max(50, Math.min(200, this.gameSpeed + delta));
+                this.updateUI();
+            }
+
+            updateUI() {
+                this.levelEl.textContent = this.currentLevel.charAt(0).toUpperCase() + this.currentLevel.slice(1);
+                this.speedEl.textContent = this.gameSpeed;
+            }
+
             placeFood() {
                 do {
                     this.food = {
@@ -137,24 +180,21 @@
 
             gameLoop() {
                 if(!this.gameRunning) return;
-
                 setTimeout(() => {
                     this.update();
                     this.gameLoop();
-                }, 150);
+                }, this.gameSpeed);
             }
 
             update() {
                 const head = {x: this.snake[0].x + this.direction.x, 
                              y: this.snake[0].y + this.direction.y};
 
-                // Wall collision
                 if(head.x < 0 || head.x >= this.gridSize || head.y < 0 || head.y >= this.gridHeight) {
                     this.gameOver();
                     return;
                 }
 
-                // Self collision
                 if(this.isSnakeOnPosition(head.x, head.y)) {
                     this.gameOver();
                     return;
@@ -162,10 +202,9 @@
 
                 this.snake.unshift(head);
 
-                // Food collision
                 if(head.x === this.food.x && head.y === this.food.y) {
                     this.score += 10;
-                    this.scoreEl.textContent = `SCORE: ${this.score}`;
+                    this.scoreEl.textContent = this.score;
                     this.placeFood();
                 } else {
                     const tail = this.snake.pop();
@@ -181,18 +220,21 @@
 
             updateCell(x, y, className) {
                 const cell = this.gameArea.querySelector(`[data-x="${x}"][data-y="${y}"]`);
-                cell.className = className ? `cell ${className}` : 'cell';
+                if(cell) cell.className = className ? `cell ${className}` : 'cell';
             }
 
             changeDirection(newDir) {
-                if((newDir.x === -this.direction.x && newDir.y === -this.direction.y) ||
-                   (newDir.y === -this.direction.y && newDir.x === -this.direction.x)) return;
-
+                // Prevent reverse direction
+                if((newDir.x * -1 === this.direction.x && newDir.y * -1 === this.direction.y)) {
+                    return;
+                }
                 this.direction = newDir;
             }
 
             bindControls() {
+                // Keyboard
                 document.addEventListener('keydown', (e) => {
+                    e.preventDefault();
                     switch(e.key) {
                         case 'ArrowUp': this.changeDirection({x: 0, y: -1}); break;
                         case 'ArrowDown': this.changeDirection({x: 0, y: 1}); break;
@@ -201,45 +243,43 @@
                     }
                 });
 
-                // Touch controls for mobile
+                // Touch swipe (fixed)
                 let startX, startY;
                 document.addEventListener('touchstart', (e) => {
                     startX = e.touches[0].clientX;
                     startY = e.touches[0].clientY;
-                });
+                }, {passive: true});
+                
                 document.addEventListener('touchend', (e) => {
+                    if(!startX || !startY) return;
                     const endX = e.changedTouches[0].clientX;
                     const endY = e.changedTouches[0].clientY;
                     const diffX = startX - endX;
                     const diffY = startY - endY;
 
-                    if(Math.abs(diffX) > Math.abs(diffY)) {
-                        if(diffX > 0) this.changeDirection({x: -1, y: 0});
-                        else this.changeDirection({x: 1, y: 0});
-                    } else {
-                        if(diffY > 0) this.changeDirection({x: 0, y: -1});
-                        else this.changeDirection({x: 0, y: 1});
+                    if(Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 30) {
+                        if(diffX > 0) this.changeDirection({x: -1, y: 0}); // Left
+                        else this.changeDirection({x: 1, y: 0}); // Right
+                    } else if(Math.abs(diffY) > 30) {
+                        if(diffY > 0) this.changeDirection({x: 0, y: -1}); // Up
+                        else this.changeDirection({x: 0, y: 1}); // Down
                     }
-                });
+                    startX = startY = null;
+                }, {passive: true});
             }
 
             gameOver() {
                 this.gameRunning = false;
                 this.finalScoreEl.textContent = this.score;
                 this.gameOverEl.style.display = 'block';
-                
-                // Restart on click
-                this.gameOverEl.addEventListener('click', () => {
-                    this.restart();
-                });
             }
 
             restart() {
-                this.snake = [{x: 10, y: 12}];
+                this.snake = [{x: 11, y: 14}];
                 this.direction = {x: 1, y: 0};
                 this.score = 0;
                 this.gameRunning = true;
-                this.scoreEl.textContent = 'SCORE: 0';
+                this.scoreEl.textContent = '0';
                 this.gameOverEl.style.display = 'none';
                 this.createGrid();
                 this.placeFood();
@@ -247,9 +287,9 @@
             }
         }
 
-        // Start game when page loads
+        let game;
         window.addEventListener('load', () => {
-            new SnakeGame();
+            game = new SnakeGame();
         });
     </script>
 </body>
