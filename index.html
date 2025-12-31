@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Xenzia - Nokia Style</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(145deg, #1a1a2e, #16213e);
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #00ff41;
+        }
+        .nokia-phone {
+            width: 300px; height: 500px;
+            background: linear-gradient(145deg, #0f1419, #1e293b);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+            position: relative;
+        }
+        .screen {
+            width: 100%; height: 70%;
+            background: #0a0a0a;
+            border: 4px solid #333;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        .game-area {
+            width: 100%; height: 100%;
+            display: grid;
+            grid-template-columns: repeat(20, 1fr);
+            grid-template-rows: repeat(25, 1fr);
+            gap: 1px;
+            padding: 10px;
+            background: #001100;
+        }
+        .cell {
+            background: #004d00;
+            border: 1px solid #003300;
+        }
+        .snake { background: #00ff41 !important; border-color: #00cc33 !important; }
+        .food { background: #ffff00 !important; border-color: #cccc00 !important; box-shadow: 0 0 5px #ffff00; }
+        .score {
+            position: absolute; top: 10px; left: 10px;
+            font-size: 18px; font-weight: bold;
+            text-shadow: 0 0 10px #00ff41;
+        }
+        .game-over {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center; color: #ff4444;
+            font-size: 24px; text-shadow: 0 0 10px #ff4444;
+            display: none;
+        }
+        .controls {
+            display: flex; justify-content: space-around;
+            font-size: 24px; color: #00ff41;
+            text-shadow: 0 0 5px #00ff41;
+        }
+        .logo {
+            position: absolute; top: 5px; right: 10px;
+            font-size: 14px; color: #666; font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="nokia-phone">
+        <div class="logo">NOKIA</div>
+        <div class="screen">
+            <div class="score" id="score">SCORE: 0</div>
+            <div class="game-area" id="gameArea"></div>
+            <div class="game-over" id="gameOver">
+                GAME OVER!<br>
+                Final: <span id="finalScore">0</span>
+            </div>
+        </div>
+        <div class="controls">
+            <div>↑</div>
+            <div>← ↓ →</div>
+        </div>
+    </div>
+
+    <script>
+        class SnakeGame {
+            constructor() {
+                this.gridSize = 20;
+                this.gridHeight = 25;
+                this.cellSize = 15;
+                this.snake = [{x: 10, y: 12}];
+                this.direction = {x: 1, y: 0};
+                this.food = {};
+                this.score = 0;
+                this.gameRunning = true;
+                this.gameArea = document.getElementById('gameArea');
+                this.scoreEl = document.getElementById('score');
+                this.gameOverEl = document.getElementById('gameOver');
+                this.finalScoreEl = document.getElementById('finalScore');
+                this.init();
+            }
+
+            init() {
+                this.createGrid();
+                this.placeFood();
+                this.gameLoop();
+                this.bindControls();
+            }
+
+            createGrid() {
+                this.gameArea.innerHTML = '';
+                for(let y = 0; y < this.gridHeight; y++) {
+                    for(let x = 0; x < this.gridSize; x++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'cell';
+                        cell.dataset.x = x;
+                        cell.dataset.y = y;
+                        this.gameArea.appendChild(cell);
+                    }
+                }
+            }
+
+            placeFood() {
+                do {
+                    this.food = {
+                        x: Math.floor(Math.random() * this.gridSize),
+                        y: Math.floor(Math.random() * this.gridHeight)
+                    };
+                } while(this.isSnakeOnPosition(this.food.x, this.food.y));
+                this.updateCell(this.food.x, this.food.y, 'food');
+            }
+
+            gameLoop() {
+                if(!this.gameRunning) return;
+
+                setTimeout(() => {
+                    this.update();
+                    this.gameLoop();
+                }, 150);
+            }
+
+            update() {
+                const head = {x: this.snake[0].x + this.direction.x, 
+                             y: this.snake[0].y + this.direction.y};
+
+                // Wall collision
+                if(head.x < 0 || head.x >= this.gridSize || head.y < 0 || head.y >= this.gridHeight) {
+                    this.gameOver();
+                    return;
+                }
+
+                // Self collision
+                if(this.isSnakeOnPosition(head.x, head.y)) {
+                    this.gameOver();
+                    return;
+                }
+
+                this.snake.unshift(head);
+
+                // Food collision
+                if(head.x === this.food.x && head.y === this.food.y) {
+                    this.score += 10;
+                    this.scoreEl.textContent = `SCORE: ${this.score}`;
+                    this.placeFood();
+                } else {
+                    const tail = this.snake.pop();
+                    this.updateCell(tail.x, tail.y, '');
+                }
+
+                this.updateCell(head.x, head.y, 'snake');
+            }
+
+            isSnakeOnPosition(x, y) {
+                return this.snake.some(segment => segment.x === x && segment.y === y);
+            }
+
+            updateCell(x, y, className) {
+                const cell = this.gameArea.querySelector(`[data-x="${x}"][data-y="${y}"]`);
+                cell.className = className ? `cell ${className}` : 'cell';
+            }
+
+            changeDirection(newDir) {
+                if((newDir.x === -this.direction.x && newDir.y === -this.direction.y) ||
+                   (newDir.y === -this.direction.y && newDir.x === -this.direction.x)) return;
+
+                this.direction = newDir;
+            }
+
+            bindControls() {
+                document.addEventListener('keydown', (e) => {
+                    switch(e.key) {
+                        case 'ArrowUp': this.changeDirection({x: 0, y: -1}); break;
+                        case 'ArrowDown': this.changeDirection({x: 0, y: 1}); break;
+                        case 'ArrowLeft': this.changeDirection({x: -1, y: 0}); break;
+                        case 'ArrowRight': this.changeDirection({x: 1, y: 0}); break;
+                    }
+                });
+
+                // Touch controls for mobile
+                let startX, startY;
+                document.addEventListener('touchstart', (e) => {
+                    startX = e.touches[0].clientX;
+                    startY = e.touches[0].clientY;
+                });
+                document.addEventListener('touchend', (e) => {
+                    const endX = e.changedTouches[0].clientX;
+                    const endY = e.changedTouches[0].clientY;
+                    const diffX = startX - endX;
+                    const diffY = startY - endY;
+
+                    if(Math.abs(diffX) > Math.abs(diffY)) {
+                        if(diffX > 0) this.changeDirection({x: -1, y: 0});
+                        else this.changeDirection({x: 1, y: 0});
+                    } else {
+                        if(diffY > 0) this.changeDirection({x: 0, y: -1});
+                        else this.changeDirection({x: 0, y: 1});
+                    }
+                });
+            }
+
+            gameOver() {
+                this.gameRunning = false;
+                this.finalScoreEl.textContent = this.score;
+                this.gameOverEl.style.display = 'block';
+                
+                // Restart on click
+                this.gameOverEl.addEventListener('click', () => {
+                    this.restart();
+                });
+            }
+
+            restart() {
+                this.snake = [{x: 10, y: 12}];
+                this.direction = {x: 1, y: 0};
+                this.score = 0;
+                this.gameRunning = true;
+                this.scoreEl.textContent = 'SCORE: 0';
+                this.gameOverEl.style.display = 'none';
+                this.createGrid();
+                this.placeFood();
+                this.gameLoop();
+            }
+        }
+
+        // Start game when page loads
+        window.addEventListener('load', () => {
+            new SnakeGame();
+        });
+    </script>
+</body>
+</html>
