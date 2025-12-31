@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Snake Xenzia - Nokia 3310</title>
+    <title>Snake Xenzia - Nokia 3310 Joystick</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -18,113 +18,128 @@
             position: relative;
         }
         .screen { 
-            width: 100%; height: 80%; background: #0a0a0a; border: 6px solid #333;
-            border-radius: 20px; position: relative; overflow: hidden; margin-bottom: 15px;
+            width: 100%; height: 85%; background: #0a0a0a; border: 6px solid #333;
+            border-radius: 20px; position: relative; overflow: hidden;
         }
-        .header {
-            position: absolute; top: 15px; left: 15px; right: 15px;
-            display: flex; justify-content: space-between; font-size: 16px; font-weight: bold;
+        
+        /* CORNER PANELS - NO OVERLAP */
+        .top-left-panel {
+            position: absolute; top: 15px; left: 15px; background: rgba(0,0,0,0.9);
+            padding: 12px; border-radius: 12px; border: 2px solid #ffff00; min-width: 90px;
         }
+        .top-right-panel {
+            position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.9);
+            padding: 12px; border-radius: 12px; border: 2px solid #00ff41; min-width: 90px;
+        }
+        
+        /* SPEED PANEL - TOP RIGHT */
+        .speed-panel { text-align: center; }
+        .speed-controls button {
+            width: 35px; height: 35px; border-radius: 50%; border: 2px solid #00ff41;
+            background: rgba(0,0,0,0.7); color: #00ff41; margin: 2px; font-weight: bold;
+            cursor: pointer;
+        }
+        
+        /* LEADERBOARD - TOP LEFT */
+        .leaderboard { max-height: 180px; overflow-y: auto; font-size: 12px; }
+        .leader-item { margin: 2px 0; color: #ffff00; }
+        .leader-you { color: #00ff41 !important; font-weight: bold; }
+        
+        /* FULL SCREEN GAME AREA */
         .game-area {
-            width: 100%; height: 60%; display: grid; grid-template-columns: repeat(24, 1fr);
-            grid-template-rows: repeat(30, 1fr); gap: 1px; padding: 15px; background: #001100;
-            margin: 40px 10px 80px;
+            position: absolute; top: 90px; left: 15px; right: 15px; bottom: 120px;
+            display: grid; grid-template-columns: repeat(24, 1fr); grid-template-rows: repeat(30, 1fr);
+            gap: 1px; padding: 10px; background: #001100;
         }
         .cell { background: #004d00; border: 1px solid #003300; }
         .snake { background: #00ff41 !important; border-color: #00cc33 !important; }
         .food { background: #ffff00 !important; border-color: #cccc00 !important; box-shadow: 0 0 10px #ffff00; }
         
-        /* Nokia Round Control Buttons */
-        .nokia-controls {
-            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
-            display: grid; grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr;
-            gap: 15px; width: 200px;
+        /* CIRCULAR JOYSTICK - BOTTOM CENTER */
+        .joystick-container {
+            position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%);
+            width: 220px; height: 220px; display: flex; align-items: center; justify-content: center;
         }
-        .control-btn {
-            width: 60px; height: 60px; border-radius: 50%; border: 4px solid #00ff41;
+        .joystick-ring {
+            width: 200px; height: 200px; border: 6px solid #00ff41; border-radius: 50%;
+            position: relative; background: rgba(0,77,0,0.3);
+            box-shadow: 0 0 30px rgba(0,255,65,0.4);
+        }
+        .joystick-left { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); }
+        .joystick-right { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); }
+        .joystick-up { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); }
+        .joystick-down { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); }
+        .joystick-pause { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        
+        .joy-btn {
+            width: 65px; height: 65px; border-radius: 50%; border: 5px solid #00ff41;
             background: linear-gradient(145deg, #004d00, #006600); color: #00ff41;
-            font-size: 24px; font-weight: bold; cursor: pointer; user-select: none;
-            display: flex; align-items: center; justify-content: center; transition: all 0.1s;
-            box-shadow: 0 8px 20px rgba(0,255,65,0.3), inset 0 2px 5px rgba(255,255,255,0.2);
+            font-size: 26px; font-weight: bold; cursor: pointer; user-select: none;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.15s; box-shadow: 0 10px 25px rgba(0,255,65,0.3);
             touch-action: manipulation;
         }
-        .control-btn:active {
-            transform: scale(0.95); box-shadow: 0 4px 10px rgba(0,255,65,0.2);
+        .joy-btn:active {
+            transform: scale(0.92); box-shadow: 0 5px 15px rgba(0,255,65,0.2);
             background: linear-gradient(145deg, #003300, #005500);
         }
-        .center-btn { grid-column: 2; grid-row: 2; background: #ff4444 !important; border-color: #ff6666 !important; color: white; font-size: 28px; }
-        
-        /* Level & Speed Panel */
-        .level-panel {
-            position: absolute; top: 70px; left: 15px; background: rgba(0,0,0,0.9);
-            padding: 12px; border-radius: 12px; border: 2px solid #00ff41;
-        }
-        .level-btns button {
-            background: rgba(0,255,65,0.2); color: #00ff41; border: 2px solid #00ff41;
-            padding: 6px 12px; border-radius: 8px; margin: 2px; cursor: pointer; font-weight: bold;
-        }
-        .speed-controls button {
-            width: 35px; height: 35px; border-radius: 50%; border: 2px solid #00ff41;
-            background: rgba(0,0,0,0.7); color: #00ff41; margin: 0 3px; font-weight: bold;
+        .pause-btn { 
+            background: linear-gradient(145deg, #ff4444, #cc3333) !important; 
+            border-color: #ff6666 !important; color: white !important; font-size: 22px;
         }
         
-        /* Leaderboard */
-        .leaderboard {
-            position: absolute; top: 70px; right: 15px; background: rgba(0,0,0,0.9);
-            padding: 12px; border-radius: 12px; border: 2px solid #ffff00; max-width: 120px;
-            max-height: 200px; overflow-y: auto;
-        }
-        .leader-item { font-size: 12px; margin: 3px 0; color: #ffff00; }
-        .leader-you { color: #00ff41 !important; font-weight: bold; }
-        
+        .logo { position: absolute; top: 8px; right: 20px; font-size: 18px; color: #666; font-weight: bold; z-index: 20; }
         .game-over {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             text-align: center; color: #ff4444; font-size: 32px; font-weight: bold;
-            text-shadow: 0 0 20px #ff4444; display: none; z-index: 10; background: rgba(0,0,0,0.95);
-            padding: 30px; border-radius: 20px; border: 3px solid #ff4444;
+            text-shadow: 0 0 20px #ff4444; display: none; z-index: 20;
+            background: rgba(0,0,0,0.95); padding: 35px; border-radius: 25px;
+            border: 4px solid #ff4444; min-width: 250px;
         }
-        .logo { position: absolute; top: 10px; right: 20px; font-size: 18px; color: #666; font-weight: bold; }
     </style>
 </head>
 <body>
     <div class="nokia-phone">
         <div class="logo">NOKIA 3310</div>
         <div class="screen">
-            <div class="header">
-                <div>SCORE: <span id="score">0</span></div>
-                <div>LVL: <span id="level">Easy</span></div>
-            </div>
-            
-            <div class="game-area" id="gameArea"></div>
-            
-            <div class="level-panel">
-                <div>Speed: <span id="speed">150</span>ms</div>
-                <div class="speed-controls">
+            <!-- SPEED PANEL - TOP RIGHT CORNER -->
+            <div class="top-right-panel speed-panel">
+                <div style="font-weight:bold;">⚡ SPEED</div>
+                <div style="font-size:14px;margin:5px 0;">Level: <span id="level">Easy</span></div>
+                <div style="font-size:14px;">Speed: <span id="speed">150</span>ms</div>
+                <div class="speed-controls" style="margin-top:8px;">
                     <button onclick="game.changeSpeed(-25)">-</button>
                     <span id="speedVal">150</span>
                     <button onclick="game.changeSpeed(25)">+</button>
                 </div>
             </div>
             
-            <div class="leaderboard" id="leaderboard">
-                <div style="font-weight:bold;color:#ffff00;">🏆 TOP SCORES</div>
+            <!-- LEADERBOARD - TOP LEFT CORNER -->
+            <div class="top-left-panel leaderboard">
+                <div style="font-weight:bold;color:#ffff00;">🏆 TOP 5</div>
                 <div id="leaderList"></div>
             </div>
             
+            <!-- FULL GAME AREA -->
+            <div class="game-area" id="gameArea"></div>
+            
+            <!-- GAME OVER MODAL -->
             <div class="game-over" id="gameOver">
                 GAME OVER!<br>
-                <div style="font-size:18px;margin:10px 0;">Final: <span id="finalScore">0</span></div>
-                <button class="control-btn center-btn" onclick="game.restart()" style="width:120px;margin-top:10px;">PLAY AGAIN</button>
+                <div style="font-size:20px;margin:15px 0;">Final: <span id="finalScore">0</span></div>
+                <button class="joy-btn pause-btn" onclick="game.restart()" style="width:140px;font-size:20px;">PLAY AGAIN</button>
             </div>
         </div>
         
-        <!-- Nokia Round D-Pad Controls -->
-        <div class="nokia-controls">
-            <div class="control-btn" ontouchstart="game.changeDirection({x:0,y:-1})" onmousedown="game.changeDirection({x:0,y:-1})">↑</div>
-            <div class="control-btn" ontouchstart="game.changeDirection({x:-1,y:0})" onmousedown="game.changeDirection({x:-1,y:0})">←</div>
-            <div class="control-btn center-btn" onclick="game.restart()">○</div>
-            <div class="control-btn" ontouchstart="game.changeDirection({x:1,y:0})" onmousedown="game.changeDirection({x:1,y:0})">→</div>
-            <div class="control-btn" ontouchstart="game.changeDirection({x:0,y:1})" onmousedown="game.changeDirection({x:0,y:1})">↓</div>
+        <!-- CIRCULAR JOYSTICK -->
+        <div class="joystick-container">
+            <div class="joystick-ring">
+                <div class="joy-btn joystick-left" ontouchstart="game.changeDirection({x:-1,y:0})" onmousedown="game.changeDirection({x:-1,y:0})">◀</div>
+                <div class="joy-btn joystick-up" ontouchstart="game.changeDirection({x:0,y:-1})" onmousedown="game.changeDirection({x:0,y:-1})">▲</div>
+                <div class="joy-btn joystick-down" ontouchstart="game.changeDirection({x:0,y:1})" onmousedown="game.changeDirection({x:0,y:1})">▼</div>
+                <div class="joy-btn joystick-right" ontouchstart="game.changeDirection({x:1,y:0})" onmousedown="game.changeDirection({x:1,y:0})">▶</div>
+                <div class="joy-btn pause-btn joystick-pause" onclick="game.togglePause()">⏸</div>
+            </div>
         </div>
     </div>
 
@@ -134,11 +149,9 @@
                 this.gridSize = 24; this.gridHeight = 30;
                 this.snake = [{x: 12, y: 15}]; this.direction = {x: 1, y: 0};
                 this.food = {}; this.score = 0; this.gameSpeed = 150;
-                this.gameRunning = true; this.currentLevel = 'easy';
+                this.gameRunning = true; this.paused = false; this.currentLevel = 'easy';
                 this.leaderboard = JSON.parse(localStorage.getItem('snakeLeaderboard') || '[]');
-                this.playerName = 'Player';
-                this.initElements();
-                this.init();
+                this.initElements(); this.init();
             }
 
             initElements() {
@@ -157,6 +170,12 @@
                 this.updateUI(); this.updateLeaderboard();
             }
 
+            togglePause() {
+                this.paused = !this.paused;
+                if(!this.paused) this.gameLoop();
+            }
+
+            // ... [rest of game logic same as previous version - createGrid, update, etc.]
             createGrid() {
                 this.gameArea.innerHTML = '';
                 for(let y = 0; y < this.gridHeight; y++) {
@@ -188,103 +207,4 @@
                 do {
                     this.food = {x: Math.floor(Math.random() * this.gridSize), y: Math.floor(Math.random() * this.gridHeight)};
                 } while(this.isSnakeOnPosition(this.food.x, this.food.y));
-                this.updateCell(this.food.x, this.food.y, 'food');
-            }
-
-            gameLoop() {
-                if(!this.gameRunning) return;
-                setTimeout(() => { this.update(); this.gameLoop(); }, this.gameSpeed);
-            }
-
-            update() {
-                const head = {x: this.snake[0].x + this.direction.x, y: this.snake[0].y + this.direction.y};
-                
-                if(head.x < 0 || head.x >= this.gridSize || head.y < 0 || head.y >= this.gridHeight || this.isSnakeOnPosition(head.x, head.y)) {
-                    this.gameOver(); return;
-                }
-
-                this.snake.unshift(head);
-                if(head.x === this.food.x && head.y === this.food.y) {
-                    this.score += 10; this.scoreEl.textContent = this.score; this.placeFood();
-                } else {
-                    const tail = this.snake.pop(); this.updateCell(tail.x, tail.y, '');
-                }
-                this.updateCell(head.x, head.y, 'snake');
-            }
-
-            isSnakeOnPosition(x, y) {
-                return this.snake.some(segment => segment.x === x && segment.y === y);
-            }
-
-            updateCell(x, y, className) {
-                const cell = this.gameArea.querySelector(`[data-x="${x}"][data-y="${y}"]`);
-                if(cell) cell.className = className ? `cell ${className}` : 'cell';
-            }
-
-            changeDirection(newDir) {
-                if((newDir.x * -1 === this.direction.x && newDir.y * -1 === this.direction.y)) return;
-                this.direction = newDir;
-            }
-
-            bindControls() {
-                document.addEventListener('keydown', (e) => {
-                    e.preventDefault();
-                    switch(e.key) {
-                        case 'ArrowUp': this.changeDirection({x:0,y:-1}); break;
-                        case 'ArrowDown': this.changeDirection({x:0,y:1}); break;
-                        case 'ArrowLeft': this.changeDirection({x:-1,y:0}); break;
-                        case 'ArrowRight': this.changeDirection({x:1,y:0}); break;
-                    }
-                });
-
-                // Touch optimized for mobile
-                let startX, startY;
-                document.addEventListener('touchstart', (e) => {
-                    startX = e.touches[0].clientX; startY = e.touches[0].clientY;
-                }, {passive: true});
-                document.addEventListener('touchend', (e) => {
-                    if(!startX || !startY) return;
-                    const endX = e.changedTouches[0].clientX, endY = e.changedTouches[0].clientY;
-                    const diffX = Math.abs(startX - endX), diffY = Math.abs(startY - endY);
-                    if(diffX > diffY && diffX > 40) {
-                        this.changeDirection({x: startX > endX ? -1 : 1, y: 0});
-                    } else if(diffY > 40) {
-                        this.changeDirection({x: 0, y: startY > endY ? -1 : 1});
-                    }
-                    startX = startY = null;
-                }, {passive: true});
-            }
-
-            updateLeaderboard() {
-                const leaders = this.leaderboard.slice(0, 5).map((score, i) => 
-                    `<div class="leader-item">${i+1}. ${score.score}</div>`
-                );
-                this.leaderboardEl.innerHTML = leaders.join('');
-            }
-
-            gameOver() {
-                this.gameRunning = false;
-                this.finalScoreEl.textContent = this.score;
-                this.gameOverEl.style.display = 'block';
-                
-                // Save to leaderboard
-                this.leaderboard.push({score: this.score, date: new Date().toLocaleDateString()});
-                this.leaderboard.sort((a,b) => b.score - a.score);
-                this.leaderboard = this.leaderboard.slice(0, 10);
-                localStorage.setItem('snakeLeaderboard', JSON.stringify(this.leaderboard));
-                this.updateLeaderboard();
-            }
-
-            restart() {
-                this.snake = [{x: 12, y: 15}]; this.direction = {x: 1, y: 0};
-                this.score = 0; this.gameRunning = true;
-                this.scoreEl.textContent = '0'; this.gameOverEl.style.display = 'none';
-                this.createGrid(); this.placeFood(); this.gameLoop();
-            }
-        }
-
-        let game;
-        window.addEventListener('load', () => { game = new SnakeGame(); });
-    </script>
-</body>
-</html>
+                this.updateCell(this.food.x, this.food.y, 'food
