@@ -3,136 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Snake Xenzia - Nokia Style</title>
+    <title>Snake Xenzia - Nokia 3310</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             background: linear-gradient(145deg, #1a1a2e, #16213e);
             font-family: 'Courier New', monospace;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            color: #00ff41;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; color: #00ff41; touch-action: manipulation;
         }
         .nokia-phone {
-            width: 340px; height: 580px;
-            background: linear-gradient(145deg, #0f1419, #1e293b);
-            border-radius: 25px;
-            padding: 25px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.9);
+            width: 360px; height: 620px; background: linear-gradient(145deg, #0f1419, #1e293b);
+            border-radius: 30px; padding: 25px; box-shadow: 0 30px 60px rgba(0,0,0,0.9);
             position: relative;
         }
-        .screen {
-            width: 100%; height: 75%;
-            background: #0a0a0a;
-            border: 5px solid #333;
-            border-radius: 15px;
-            position: relative;
-            overflow: hidden;
-            margin-bottom: 15px;
+        .screen { 
+            width: 100%; height: 80%; background: #0a0a0a; border: 6px solid #333;
+            border-radius: 20px; position: relative; overflow: hidden; margin-bottom: 15px;
+        }
+        .header {
+            position: absolute; top: 15px; left: 15px; right: 15px;
+            display: flex; justify-content: space-between; font-size: 16px; font-weight: bold;
         }
         .game-area {
-            width: 100%; height: 70%;
-            display: grid;
-            grid-template-columns: repeat(22, 1fr);
-            grid-template-rows: repeat(28, 1fr);
-            gap: 1px;
-            padding: 12px;
-            background: #001100;
-            margin-bottom: 10px;
+            width: 100%; height: 60%; display: grid; grid-template-columns: repeat(24, 1fr);
+            grid-template-rows: repeat(30, 1fr); gap: 1px; padding: 15px; background: #001100;
+            margin: 40px 10px 80px;
         }
-        .cell {
-            background: #004d00;
-            border: 1px solid #003300;
-        }
+        .cell { background: #004d00; border: 1px solid #003300; }
         .snake { background: #00ff41 !important; border-color: #00cc33 !important; }
-        .food { background: #ffff00 !important; border-color: #cccc00 !important; box-shadow: 0 0 8px #ffff00; }
-        .ui-panel {
-            position: absolute; bottom: 15px; left: 15px; right: 15px;
-            background: rgba(0,0,0,0.8); padding: 10px; border-radius: 8px;
-            display: flex; justify-content: space-between; align-items: center;
+        .food { background: #ffff00 !important; border-color: #cccc00 !important; box-shadow: 0 0 10px #ffff00; }
+        
+        /* Nokia Round Control Buttons */
+        .nokia-controls {
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            display: grid; grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr;
+            gap: 15px; width: 200px;
         }
-        .score-level { font-size: 16px; font-weight: bold; }
-        .level-btns button, .speed-btns button {
-            background: #00ff41; color: #000; border: none;
-            padding: 8px 12px; border-radius: 5px; font-weight: bold;
-            cursor: pointer; font-size: 14px; margin: 0 2px;
+        .control-btn {
+            width: 60px; height: 60px; border-radius: 50%; border: 4px solid #00ff41;
+            background: linear-gradient(145deg, #004d00, #006600); color: #00ff41;
+            font-size: 24px; font-weight: bold; cursor: pointer; user-select: none;
+            display: flex; align-items: center; justify-content: center; transition: all 0.1s;
+            box-shadow: 0 8px 20px rgba(0,255,65,0.3), inset 0 2px 5px rgba(255,255,255,0.2);
+            touch-action: manipulation;
         }
-        .speed-btns button { background: #444; color: #00ff41; }
+        .control-btn:active {
+            transform: scale(0.95); box-shadow: 0 4px 10px rgba(0,255,65,0.2);
+            background: linear-gradient(145deg, #003300, #005500);
+        }
+        .center-btn { grid-column: 2; grid-row: 2; background: #ff4444 !important; border-color: #ff6666 !important; color: white; font-size: 28px; }
+        
+        /* Level & Speed Panel */
+        .level-panel {
+            position: absolute; top: 70px; left: 15px; background: rgba(0,0,0,0.9);
+            padding: 12px; border-radius: 12px; border: 2px solid #00ff41;
+        }
+        .level-btns button {
+            background: rgba(0,255,65,0.2); color: #00ff41; border: 2px solid #00ff41;
+            padding: 6px 12px; border-radius: 8px; margin: 2px; cursor: pointer; font-weight: bold;
+        }
+        .speed-controls button {
+            width: 35px; height: 35px; border-radius: 50%; border: 2px solid #00ff41;
+            background: rgba(0,0,0,0.7); color: #00ff41; margin: 0 3px; font-weight: bold;
+        }
+        
+        /* Leaderboard */
+        .leaderboard {
+            position: absolute; top: 70px; right: 15px; background: rgba(0,0,0,0.9);
+            padding: 12px; border-radius: 12px; border: 2px solid #ffff00; max-width: 120px;
+            max-height: 200px; overflow-y: auto;
+        }
+        .leader-item { font-size: 12px; margin: 3px 0; color: #ffff00; }
+        .leader-you { color: #00ff41 !important; font-weight: bold; }
+        
         .game-over {
-            position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center; color: #ff4444;
-            font-size: 28px; font-weight: bold; text-shadow: 0 0 15px #ff4444;
-            display: none; z-index: 10;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            text-align: center; color: #ff4444; font-size: 32px; font-weight: bold;
+            text-shadow: 0 0 20px #ff4444; display: none; z-index: 10; background: rgba(0,0,0,0.95);
+            padding: 30px; border-radius: 20px; border: 3px solid #ff4444;
         }
-        .logo {
-            position: absolute; top: 8px; right: 15px;
-            font-size: 16px; color: #666; font-weight: bold;
-        }
-        .restart-btn {
-            background: #ff4444; color: white; border: none;
-            padding: 12px 24px; border-radius: 8px; font-size: 18px;
-            cursor: pointer; margin-top: 15px; font-weight: bold;
-        }
+        .logo { position: absolute; top: 10px; right: 20px; font-size: 18px; color: #666; font-weight: bold; }
     </style>
 </head>
 <body>
     <div class="nokia-phone">
-        <div class="logo">NOKIA</div>
+        <div class="logo">NOKIA 3310</div>
         <div class="screen">
+            <div class="header">
+                <div>SCORE: <span id="score">0</span></div>
+                <div>LVL: <span id="level">Easy</span></div>
+            </div>
+            
             <div class="game-area" id="gameArea"></div>
-            <div class="ui-panel">
-                <div class="score-level">
-                    <div>SCORE: <span id="score">0</span></div>
-                    <div>LEVEL: <span id="level">Easy</span> (Speed: <span id="speed">150</span>ms)</div>
-                </div>
-                <div class="level-btns">
-                    <button onclick="game.setLevel('easy')">Easy</button>
-                    <button onclick="game.setLevel('medium')">Med</button>
-                    <button onclick="game.setLevel('hard')">Hard</button>
-                </div>
-                <div class="speed-btns">
+            
+            <div class="level-panel">
+                <div>Speed: <span id="speed">150</span>ms</div>
+                <div class="speed-controls">
                     <button onclick="game.changeSpeed(-25)">-</button>
+                    <span id="speedVal">150</span>
                     <button onclick="game.changeSpeed(25)">+</button>
                 </div>
             </div>
+            
+            <div class="leaderboard" id="leaderboard">
+                <div style="font-weight:bold;color:#ffff00;">🏆 TOP SCORES</div>
+                <div id="leaderList"></div>
+            </div>
+            
             <div class="game-over" id="gameOver">
                 GAME OVER!<br>
-                Final Score: <span id="finalScore">0</span><br>
-                <button class="restart-btn" onclick="game.restart()">PLAY AGAIN</button>
+                <div style="font-size:18px;margin:10px 0;">Final: <span id="finalScore">0</span></div>
+                <button class="control-btn center-btn" onclick="game.restart()" style="width:120px;margin-top:10px;">PLAY AGAIN</button>
             </div>
+        </div>
+        
+        <!-- Nokia Round D-Pad Controls -->
+        <div class="nokia-controls">
+            <div class="control-btn" ontouchstart="game.changeDirection({x:0,y:-1})" onmousedown="game.changeDirection({x:0,y:-1})">↑</div>
+            <div class="control-btn" ontouchstart="game.changeDirection({x:-1,y:0})" onmousedown="game.changeDirection({x:-1,y:0})">←</div>
+            <div class="control-btn center-btn" onclick="game.restart()">○</div>
+            <div class="control-btn" ontouchstart="game.changeDirection({x:1,y:0})" onmousedown="game.changeDirection({x:1,y:0})">→</div>
+            <div class="control-btn" ontouchstart="game.changeDirection({x:0,y:1})" onmousedown="game.changeDirection({x:0,y:1})">↓</div>
         </div>
     </div>
 
     <script>
         class SnakeGame {
             constructor() {
-                this.gridSize = 22;
-                this.gridHeight = 28;
-                this.snake = [{x: 11, y: 14}];
-                this.direction = {x: 1, y: 0};
-                this.food = {};
-                this.score = 0;
-                this.gameSpeed = 150; // Easy: 150ms, Medium: 100ms, Hard: 75ms
-                this.gameRunning = true;
-                this.currentLevel = 'easy';
+                this.gridSize = 24; this.gridHeight = 30;
+                this.snake = [{x: 12, y: 15}]; this.direction = {x: 1, y: 0};
+                this.food = {}; this.score = 0; this.gameSpeed = 150;
+                this.gameRunning = true; this.currentLevel = 'easy';
+                this.leaderboard = JSON.parse(localStorage.getItem('snakeLeaderboard') || '[]');
+                this.playerName = 'Player';
+                this.initElements();
+                this.init();
+            }
+
+            initElements() {
                 this.gameArea = document.getElementById('gameArea');
                 this.scoreEl = document.getElementById('score');
                 this.levelEl = document.getElementById('level');
                 this.speedEl = document.getElementById('speed');
+                this.speedValEl = document.getElementById('speedVal');
                 this.gameOverEl = document.getElementById('gameOver');
                 this.finalScoreEl = document.getElementById('finalScore');
-                this.init();
+                this.leaderboardEl = document.getElementById('leaderList');
             }
 
             init() {
-                this.createGrid();
-                this.placeFood();
-                this.gameLoop();
-                this.bindControls();
-                this.updateUI();
+                this.createGrid(); this.placeFood(); this.gameLoop(); this.bindControls();
+                this.updateUI(); this.updateLeaderboard();
             }
 
             createGrid() {
@@ -140,9 +162,7 @@
                 for(let y = 0; y < this.gridHeight; y++) {
                     for(let x = 0; x < this.gridSize; x++) {
                         const cell = document.createElement('div');
-                        cell.className = 'cell';
-                        cell.dataset.x = x;
-                        cell.dataset.y = y;
+                        cell.className = 'cell'; cell.dataset.x = x; cell.dataset.y = y;
                         this.gameArea.appendChild(cell);
                     }
                 }
@@ -150,67 +170,45 @@
 
             setLevel(level) {
                 this.currentLevel = level;
-                switch(level) {
-                    case 'easy': this.gameSpeed = 150; break;
-                    case 'medium': this.gameSpeed = 100; break;
-                    case 'hard': this.gameSpeed = 75; break;
-                }
+                this.gameSpeed = {easy: 150, medium: 100, hard: 75}[level];
                 this.updateUI();
             }
 
             changeSpeed(delta) {
-                this.gameSpeed = Math.max(50, Math.min(200, this.gameSpeed + delta));
+                this.gameSpeed = Math.max(50, Math.min(250, this.gameSpeed + delta));
                 this.updateUI();
             }
 
             updateUI() {
-                this.levelEl.textContent = this.currentLevel.charAt(0).toUpperCase() + this.currentLevel.slice(1);
-                this.speedEl.textContent = this.gameSpeed;
+                this.levelEl.textContent = this.currentLevel.toUpperCase();
+                this.speedEl.textContent = this.speedValEl.textContent = this.gameSpeed;
             }
 
             placeFood() {
                 do {
-                    this.food = {
-                        x: Math.floor(Math.random() * this.gridSize),
-                        y: Math.floor(Math.random() * this.gridHeight)
-                    };
+                    this.food = {x: Math.floor(Math.random() * this.gridSize), y: Math.floor(Math.random() * this.gridHeight)};
                 } while(this.isSnakeOnPosition(this.food.x, this.food.y));
                 this.updateCell(this.food.x, this.food.y, 'food');
             }
 
             gameLoop() {
                 if(!this.gameRunning) return;
-                setTimeout(() => {
-                    this.update();
-                    this.gameLoop();
-                }, this.gameSpeed);
+                setTimeout(() => { this.update(); this.gameLoop(); }, this.gameSpeed);
             }
 
             update() {
-                const head = {x: this.snake[0].x + this.direction.x, 
-                             y: this.snake[0].y + this.direction.y};
-
-                if(head.x < 0 || head.x >= this.gridSize || head.y < 0 || head.y >= this.gridHeight) {
-                    this.gameOver();
-                    return;
-                }
-
-                if(this.isSnakeOnPosition(head.x, head.y)) {
-                    this.gameOver();
-                    return;
+                const head = {x: this.snake[0].x + this.direction.x, y: this.snake[0].y + this.direction.y};
+                
+                if(head.x < 0 || head.x >= this.gridSize || head.y < 0 || head.y >= this.gridHeight || this.isSnakeOnPosition(head.x, head.y)) {
+                    this.gameOver(); return;
                 }
 
                 this.snake.unshift(head);
-
                 if(head.x === this.food.x && head.y === this.food.y) {
-                    this.score += 10;
-                    this.scoreEl.textContent = this.score;
-                    this.placeFood();
+                    this.score += 10; this.scoreEl.textContent = this.score; this.placeFood();
                 } else {
-                    const tail = this.snake.pop();
-                    this.updateCell(tail.x, tail.y, '');
+                    const tail = this.snake.pop(); this.updateCell(tail.x, tail.y, '');
                 }
-
                 this.updateCell(head.x, head.y, 'snake');
             }
 
@@ -224,73 +222,69 @@
             }
 
             changeDirection(newDir) {
-                // Prevent reverse direction
-                if((newDir.x * -1 === this.direction.x && newDir.y * -1 === this.direction.y)) {
-                    return;
-                }
+                if((newDir.x * -1 === this.direction.x && newDir.y * -1 === this.direction.y)) return;
                 this.direction = newDir;
             }
 
             bindControls() {
-                // Keyboard
                 document.addEventListener('keydown', (e) => {
                     e.preventDefault();
                     switch(e.key) {
-                        case 'ArrowUp': this.changeDirection({x: 0, y: -1}); break;
-                        case 'ArrowDown': this.changeDirection({x: 0, y: 1}); break;
-                        case 'ArrowLeft': this.changeDirection({x: -1, y: 0}); break;
-                        case 'ArrowRight': this.changeDirection({x: 1, y: 0}); break;
+                        case 'ArrowUp': this.changeDirection({x:0,y:-1}); break;
+                        case 'ArrowDown': this.changeDirection({x:0,y:1}); break;
+                        case 'ArrowLeft': this.changeDirection({x:-1,y:0}); break;
+                        case 'ArrowRight': this.changeDirection({x:1,y:0}); break;
                     }
                 });
 
-                // Touch swipe (fixed)
+                // Touch optimized for mobile
                 let startX, startY;
                 document.addEventListener('touchstart', (e) => {
-                    startX = e.touches[0].clientX;
-                    startY = e.touches[0].clientY;
+                    startX = e.touches[0].clientX; startY = e.touches[0].clientY;
                 }, {passive: true});
-                
                 document.addEventListener('touchend', (e) => {
                     if(!startX || !startY) return;
-                    const endX = e.changedTouches[0].clientX;
-                    const endY = e.changedTouches[0].clientY;
-                    const diffX = startX - endX;
-                    const diffY = startY - endY;
-
-                    if(Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 30) {
-                        if(diffX > 0) this.changeDirection({x: -1, y: 0}); // Left
-                        else this.changeDirection({x: 1, y: 0}); // Right
-                    } else if(Math.abs(diffY) > 30) {
-                        if(diffY > 0) this.changeDirection({x: 0, y: -1}); // Up
-                        else this.changeDirection({x: 0, y: 1}); // Down
+                    const endX = e.changedTouches[0].clientX, endY = e.changedTouches[0].clientY;
+                    const diffX = Math.abs(startX - endX), diffY = Math.abs(startY - endY);
+                    if(diffX > diffY && diffX > 40) {
+                        this.changeDirection({x: startX > endX ? -1 : 1, y: 0});
+                    } else if(diffY > 40) {
+                        this.changeDirection({x: 0, y: startY > endY ? -1 : 1});
                     }
                     startX = startY = null;
                 }, {passive: true});
+            }
+
+            updateLeaderboard() {
+                const leaders = this.leaderboard.slice(0, 5).map((score, i) => 
+                    `<div class="leader-item">${i+1}. ${score.score}</div>`
+                );
+                this.leaderboardEl.innerHTML = leaders.join('');
             }
 
             gameOver() {
                 this.gameRunning = false;
                 this.finalScoreEl.textContent = this.score;
                 this.gameOverEl.style.display = 'block';
+                
+                // Save to leaderboard
+                this.leaderboard.push({score: this.score, date: new Date().toLocaleDateString()});
+                this.leaderboard.sort((a,b) => b.score - a.score);
+                this.leaderboard = this.leaderboard.slice(0, 10);
+                localStorage.setItem('snakeLeaderboard', JSON.stringify(this.leaderboard));
+                this.updateLeaderboard();
             }
 
             restart() {
-                this.snake = [{x: 11, y: 14}];
-                this.direction = {x: 1, y: 0};
-                this.score = 0;
-                this.gameRunning = true;
-                this.scoreEl.textContent = '0';
-                this.gameOverEl.style.display = 'none';
-                this.createGrid();
-                this.placeFood();
-                this.gameLoop();
+                this.snake = [{x: 12, y: 15}]; this.direction = {x: 1, y: 0};
+                this.score = 0; this.gameRunning = true;
+                this.scoreEl.textContent = '0'; this.gameOverEl.style.display = 'none';
+                this.createGrid(); this.placeFood(); this.gameLoop();
             }
         }
 
         let game;
-        window.addEventListener('load', () => {
-            game = new SnakeGame();
-        });
+        window.addEventListener('load', () => { game = new SnakeGame(); });
     </script>
 </body>
 </html>
